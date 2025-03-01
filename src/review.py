@@ -16,9 +16,6 @@ client = genai.Client(api_key=os.getenv('VUE_APP_GEMINI_API_KEY'))
 
 def main():
 
-  # TODO: mime_type="text/plain" pythonならtext/x-python jsならtext/javascript
-  # TODO: file_listエラー
-
   parser = argparse.ArgumentParser(description="ディレクトリ")
   parser.add_argument('dir', type=str, help='対象ディレクトリ')
   args = parser.parse_args()
@@ -43,16 +40,23 @@ def main():
     print(response.text)
     with open('./response.txt', 'w', encoding='utf-8') as file:
       file.write(response.text)
-    #dropUploadFile()
+    dropUploadFile()
   else:
     print('missing arg')
   
   print('done')
 
 def uploadFileGemini(fileIo):
-  # TODO: mimeTypeの調整
+  _, ext = os.path.splitext(fileIo)
+  ext = ext.lower()
+  if ext in ['.py']:
+    mimeType = 'text/x-python'
+  elif ext in ['.js']: 
+    mimeType = 'text/javascript'
+  else:
+    mimeType = 'text/plain'
   return client.files.upload(file=fileIo, config=dict(
-    mime_type='text/plain'
+    mime_type = mimeType
   ))
 
 def dropUploadFile():
